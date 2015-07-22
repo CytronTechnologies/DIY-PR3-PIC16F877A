@@ -1,0 +1,979 @@
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;===============================================================================================
+                      00002 ;
+                      00003 ;       Author                                  : Cytron Technologies
+                      00004 ;   Project                                     : DIY Project
+                      00005 ;       Project Descrription    : PR3 (LCD Display)
+                      00006 ;       Date                                    : 26 May 2009
+                      00007 ;
+                      00008 ;===============================================================================================
+                      00009 
+                      00010 
+                      00011 ;=======================================================================================================
+                            ======
+                      00012 ;The protocol for the LCD
+                      00013 ;=======================================================================================================
+                            ========
+                      00014 ;R/S    DB7             DB6             DB5             DB4             DB3             DB2             
+                            DB1             DB0             Functions
+                      00015 ;0              0               0               0               0               0               0       
+                                    0               1               Clear LCD
+                      00016 ;0              0               0               0               0               0               0       
+                                    1               X               Return Cursor to home position
+                      00017 ;0              0               0               0               0               0               1       
+                                    ID              S               Set Cursor move direction
+                      00018 ;0              0               0               0               0               1               D       
+                                    C               B               Enable Display/Cursor
+                      00019 ;0              0               0               0               1               SC              RL      
+                                    X               X               Move Cursor/Shift Display
+                      00020 ;0              0               0               1               DL              N               F       
+                                    X               X               Set Interface Length and Display format
+                      00021 ;0              1               A               A               A               A               A       
+                                    A               A               Move Cursor to DDRAM
+                      00022 ;1              D               D               D               D               D               D       
+                                    D               D               Write a character to Display and DDRAM
+                      00023 ;
+                      00024 ;X = Don't care
+                      00025 ;A = Address
+                      00026 ;=======================================================================================================
+                            =========
+                      00027 
+                      00028 ;=======================================================================================================
+                            =========
+                      00029 ;LCD command bit value and function
+                      00030 ;*******************************************************************************************************
+                            *********
+                      00031 ;Bit name               Bit Function                                    = 0                             
+                                            = 1
+                      00032 ;*******************************************************************************************************
+                            *********
+                      00033 ;R/S                    Command or Character                    Command                                 
+                            Character
+                      00034 ;ID                     Set cursor move direction               Decrement                               
+                            increment
+                      00035 ;S                              Specifies to shift display              No display shift                
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                            Display shift
+                      00036 ;D                              Set display On/Off                              Display Off             
+                                            Display On
+                      00037 ;C                              Cursor On/Off                                   Cursor Off              
+                                            Cursor On
+                      00038 ;B                              Cursor Blink                                    Cursor Blink Off        
+                                    Cursor Blink On
+                      00039 ;SC                             Set Cursor move or shift D              Move Cursor                     
+                                    Shift Display
+                      00040 ;RL                             Shift direction                                 Shift Left              
+                                            Shift Right
+                      00041 ;DL                             Sets Interface data length              4-bit Interface                 
+                            8-bit Interface
+                      00042 ;N                              Number of display line                  1 line                          
+                                    2 line
+                      00043 ;F                              Character font                                  5x7 dots                
+                                            5x10 dots
+                      00044 ;=======================================================================================================
+                            =========
+                      00045 
+                      00046 ;=======================================================================================================
+                            =========
+                      00047 ;                                                                                                       
+                            DDRAM ADDRESS in HEX
+                      00048 ;=======================================================================================================
+                            =========
+                      00049 ;
+                      00050 ;       Display                     1     2   3     4   5        6        7        8    9        10     
+                              11   12       13      14       15    16       
+                      00051 ;                                       ----------------------------------------------------------------
+                            -----------------------------
+                      00052 ;       Line 1                  | | 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 | 0A | 0B | 0C | 0D 
+                            | 0E | 0F | |
+                      00053 ;       Line 2                  | | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 4A | 4B | 4C | 4D 
+                            | 4E | 4F | |
+                      00054 ;                                       ----------------------------------------------------------------
+                            -----------------------------
+                      00055 ;=======================================================================================================
+                            =========
+                      00056 
+                      00057 
+                      00058 
+                      00059                         LIST P=16F877A
+                      00060 
+                      00061                         ERRORLEVEL      -302
+                      00062                         ERRORLEVEL      -305
+                      00063 
+                      00064                         #INCLUDE <P16F877A.INC>
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC16F877A processor include
+                      00005 ; 
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      00566         LIST
+                      00065 
+2007   3F32           00066                         __CONFIG        0X3F32
+                      00067 
+                      00068 ;===========================================================================================
+                      00069 ; MACRO
+                      00070 ;===========================================================================================
+                      00071 
+                      00072 BANK0           MACRO                                   ;CHANGE TO BANK 0
+                      00073                         BCF             STATUS,RP0                                      
+                      00074                         BCF             STATUS,RP1
+                      00075                         ENDM
+                      00076                         
+                      00077 BANK1           MACRO                                   ;CHANGE TO BANK 1
+                      00078                         BSF             STATUS,RP0
+                      00079                         BCF             STATUS,RP1
+                      00080                         ENDM
+                      00081                 
+                      00082 BANK2           MACRO                                   ;CHANGE TO BANK 2
+                      00083                         BCF             STATUS,RP0
+                      00084                         BSF             STATUS,RP1
+                      00085                         ENDM
+                      00086                 
+                      00087 BANK3           MACRO                                   ;CHANGE TO BANK 3
+                      00088                         BSF             STATUS,RP0                                                      
+                                                                                                                            
+                      00089                         BSF             STATUS,RP1
+                      00090                         ENDM
+                      00091 
+                      00092 CLOCK_E         MACRO                                   ;'E' RISE UP N FALL DOWN
+                      00093                         BSF             PORTB,5
+                      00094                         CALL    DELAY1
+                      00095                         BCF             PORTB,5
+                      00096                         CALL    DELAY1
+                      00097                         ENDM
+                      00098 
+                      00099 ;========================================================================================
+                      00100 ; VARIABLE DEFINATION
+                      00101 ;========================================================================================
+                      00102 ;DATA MEMORY ADDRESS =  20h - 7Fh (BANK0)
+                      00103 ;                                               A0h - EFh (BANK1)
+                      00104 ;                                               110h - 16Fh (BANK2)
+                      00105 ;                                               190h - 1EFh     (BANK3)
+                      00106 
+  00000020            00107 D1                      EQU             0X20    ;FOR DELAY
+  00000021            00108 D2                      EQU             0X21    ;FOR DELAY
+  00000022            00109 D3                      EQU             0X22    ;FOR DELAY
+  00000023            00110 D4                      EQU             0X23    ;FOR DELAY
+  00000024            00111 D5                      EQU             0X24    ;FOR DELAY
+  00000025            00112 D6                      EQU             0X25    ;FOR DELAY
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00113 
+                      00114 
+                      00115 
+                      00116 
+                      00117 ;=========================================================================================
+                      00118 ; RESET VECTOR
+                      00119 ;=========================================================================================
+0200                  00120                         ORG             0X200
+                      00121 
+0200   2A05           00122 RESET           GOTO    INIT
+                      00123 
+                      00124 
+                      00125 ;=========================================================================================
+                      00126 ;INTERRUPT VECTOR 
+                      00127 ;=========================================================================================
+                      00128         
+                      00129 
+0204                  00130                         ORG             0X204
+                      00131         
+0204   2A05           00132 INT                     GOTO    INIT
+                      00133 
+                      00134 ;=========================================================================================
+                      00135 ; INITIALIAZATION OF I/O
+                      00136 ;=========================================================================================
+                      00137 
+                      00138 
+0205                  00139                         ORG             0X205
+                      00140 
+                      00141 INIT            BANK0
+0205   1283               M                         BCF             STATUS,RP0                                      
+0206   1303               M                         BCF             STATUS,RP1
+                      00142 
+0207   0185           00143                         CLRF    PORTA
+0208   0188           00144                         CLRF    PORTD
+0209   0187           00145                         CLRF    PORTC
+020A   0188           00146                         CLRF    PORTD
+020B   0189           00147                         CLRF    PORTE   
+                      00148 
+                      00149                         BANK1
+020C   1683               M                         BSF             STATUS,RP0
+020D   1303               M                         BCF             STATUS,RP1
+                      00150 
+020E   3006           00151                         MOVLW   0X06
+020F   009F           00152                         MOVWF   ADCON1                  ;PORTA AS DIGITAL I/O
+0210   0185           00153                         CLRF    TRISA                   ;PORTA AS OUTPUT
+0211   0186           00154                         CLRF    TRISB                   ;PORTD AS OUTPUT
+0212   0187           00155                         CLRF    TRISC                   ;PORTC AS OUTPUT
+0213   0188           00156                         CLRF    TRISD                   ;PORTD AS OUTPUT
+0214   0189           00157                         CLRF    TRISE                   ;PORTE AS OUTPUT
+                      00158                                 
+                      00159                         BANK0
+0215   1283               M                         BCF             STATUS,RP0                                      
+0216   1303               M                         BCF             STATUS,RP1
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0217   0188           00160                         CLRF    PORTD
+                      00161 
+                      00162 
+                      00163 ;============================================================================================== 
+                      00164 ;MAIN PROGRAM STRAT HERE
+                      00165 ;==============================================================================================
+                      00166 
+                      00167 ;LCD INITIALIZED
+                      00168                         
+0218   22CF           00169                         CALL    DELAY1
+0219   22CF           00170                         CALL    DELAY1
+                      00171 
+021A   1206           00172                         BCF             PORTB,4                         ; R/S SET TO '0'as a command    
+                                    
+021B   3030           00173                         MOVLW   B'00110000'                     
+021C   0088           00174                         MOVWF   PORTD                           ; FUNCTION SET: 8 BIT INTERFACE
+                      00175                         CLOCK_E                                         ; E CLOCK MACRO
+021D   1686               M                         BSF             PORTB,5
+021E   22CF               M                         CALL    DELAY1
+021F   1286               M                         BCF             PORTB,5
+0220   22CF               M                         CALL    DELAY1
+0221   300D           00176                         MOVLW   B'00001101'                     
+0222   0088           00177                         MOVWF   PORTD                           ; DISPALY & CURSOR: SET TO DISPLAY ON; C
+                            URSOR UNDERLINE OFF; CURSOR BLINK ON
+                      00178                         CLOCK_E                                         ; E CLOCK MACRO
+0223   1686               M                         BSF             PORTB,5
+0224   22CF               M                         CALL    DELAY1
+0225   1286               M                         BCF             PORTB,5
+0226   22CF               M                         CALL    DELAY1
+0227   3038           00179                         MOVLW   B'00111000'             
+0228   0088           00180                         MOVWF   PORTD                           ; FUNCTION SET: 8 BIT; 2 LINE MODE; 5X7 
+                            DOT FORMAT
+                      00181                         CLOCK_E                                         ; E CLOCK MACRO
+0229   1686               M                         BSF             PORTB,5
+022A   22CF               M                         CALL    DELAY1
+022B   1286               M                         BCF             PORTB,5
+022C   22CF               M                         CALL    DELAY1
+022D   3001           00182                         MOVLW   B'00000001'                     
+022E   0088           00183                         MOVWF   PORTD                           ; CLEAR DISPLAY
+                      00184                         CLOCK_E                                         ; E CLOCK MACRO                 
+                                                                            
+022F   1686               M                         BSF             PORTB,5
+0230   22CF               M                         CALL    DELAY1
+0231   1286               M                         BCF             PORTB,5
+0232   22CF               M                         CALL    DELAY1
+0233   3006           00185                         MOVLW   B'00000110'
+0234   0088           00186                         MOVWF   PORTD                           ; CHARACTER ENTRY MODE: INCREMENT; DISPL
+                            AY SHIFT ON
+                      00187                         CLOCK_E                                         ; E CLOCK MACRO
+0235   1686               M                         BSF             PORTB,5
+0236   22CF               M                         CALL    DELAY1
+0237   1286               M                         BCF             PORTB,5
+0238   22CF               M                         CALL    DELAY1
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00188 
+                      00189 
+                      00190 ;WRITE YOUR CHARACTER HERE
+                      00191 
+0239   1606           00192                         BSF             PORTB,4         ;R/S SET TO '1' to write character
+023A   3048           00193                         MOVLW   B'01001000'             ;'H'in ASCII mode
+023B   0088           00194                         MOVWF   PORTD                   ;Display 'H'
+                      00195                         CLOCK_E                                 
+023C   1686               M                         BSF             PORTB,5
+023D   22CF               M                         CALL    DELAY1
+023E   1286               M                         BCF             PORTB,5
+023F   22CF               M                         CALL    DELAY1
+0240   3065           00196                         MOVLW   B'01100101'             ;'e' in ASCII mode
+0241   0088           00197                         MOVWF   PORTD                   ;Display 'e'
+                      00198                         CLOCK_E                                 
+0242   1686               M                         BSF             PORTB,5
+0243   22CF               M                         CALL    DELAY1
+0244   1286               M                         BCF             PORTB,5
+0245   22CF               M                         CALL    DELAY1
+0246   3072           00199                         MOVLW   B'01110010'             ;'r' in ASCII mode
+0247   0088           00200                         MOVWF   PORTD                   ;Diplay 'r'
+                      00201                         CLOCK_E                                 
+0248   1686               M                         BSF             PORTB,5
+0249   22CF               M                         CALL    DELAY1
+024A   1286               M                         BCF             PORTB,5
+024B   22CF               M                         CALL    DELAY1
+024C   3065           00202                         MOVLW   B'01100101'             ;'e' in ASCII mode
+024D   0088           00203                         MOVWF   PORTD                   ;Display 'e'
+                      00204                         CLOCK_E
+024E   1686               M                         BSF             PORTB,5
+024F   22CF               M                         CALL    DELAY1
+0250   1286               M                         BCF             PORTB,5
+0251   22CF               M                         CALL    DELAY1
+0252   30A0           00205                         MOVLW   B'10100000'             
+0253   0088           00206                         MOVWF   PORTD                   ;SPACE
+                      00207                         CLOCK_E 
+0254   1686               M                         BSF             PORTB,5
+0255   22CF               M                         CALL    DELAY1
+0256   1286               M                         BCF             PORTB,5
+0257   22CF               M                         CALL    DELAY1
+0258   3075           00208                         MOVLW   B'01110101'             ;'u' in ASCII mode
+0259   0088           00209                         MOVWF   PORTD                   ;Display 'u'
+                      00210                         CLOCK_E
+025A   1686               M                         BSF             PORTB,5
+025B   22CF               M                         CALL    DELAY1
+025C   1286               M                         BCF             PORTB,5
+025D   22CF               M                         CALL    DELAY1
+025E   30A0           00211                         MOVLW   B'10100000'             
+025F   0088           00212                         MOVWF   PORTD                   ;SPACE
+                      00213                         CLOCK_E
+0260   1686               M                         BSF             PORTB,5
+0261   22CF               M                         CALL    DELAY1
+0262   1286               M                         BCF             PORTB,5
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0263   22CF               M                         CALL    DELAY1
+0264   3067           00214                         MOVLW   B'01100111'             ;'g' in ASCII mode
+0265   0088           00215                         MOVWF   PORTD                   ;Display 'g'
+                      00216                         CLOCK_E
+0266   1686               M                         BSF             PORTB,5
+0267   22CF               M                         CALL    DELAY1
+0268   1286               M                         BCF             PORTB,5
+0269   22CF               M                         CALL    DELAY1
+026A   306F           00217                         MOVLW   B'01101111'             ;'o' in ASCII mode
+026B   0088           00218                         MOVWF   PORTD                   ;Display 'o'
+                      00219                         CLOCK_E
+026C   1686               M                         BSF             PORTB,5
+026D   22CF               M                         CALL    DELAY1
+026E   1286               M                         BCF             PORTB,5
+026F   22CF               M                         CALL    DELAY1
+0270   302E           00220                         MOVLW   B'00101110'             ;'.' in ASCII mode
+0271   0088           00221                         MOVWF   PORTD                   ;Display '.'
+                      00222                         CLOCK_E
+0272   1686               M                         BSF             PORTB,5
+0273   22CF               M                         CALL    DELAY1
+0274   1286               M                         BCF             PORTB,5
+0275   22CF               M                         CALL    DELAY1
+0276   302E           00223                         MOVLW   B'00101110'             ;'.' in ASCII mode
+0277   0088           00224                         MOVWF   PORTD                   ;Display '.'
+                      00225                         CLOCK_E
+0278   1686               M                         BSF             PORTB,5
+0279   22CF               M                         CALL    DELAY1
+027A   1286               M                         BCF             PORTB,5
+027B   22CF               M                         CALL    DELAY1
+                      00226                                 
+027C   22CF           00227                         CALL    DELAY1
+                      00228                         
+027D   1206           00229                         BCF             PORTB,4                 ; R/S SET TO '0' as a command
+027E   30C0           00230                         MOVLW   B'11000000'             ; B'10000000' is a command to jump to 2nd line
+                      00231                                                                         ; B'01000000' or '0x40' is DDRAM
+                             address
+                      00232                                                                         ; B'100000000'| B'01000000'
+027F   0088           00233                         MOVWF   PORTD                   ; JUMP TO 2ND LINE
+                      00234                         CLOCK_E
+0280   1686               M                         BSF             PORTB,5
+0281   22CF               M                         CALL    DELAY1
+0282   1286               M                         BCF             PORTB,5
+0283   22CF               M                         CALL    DELAY1
+                      00235 
+0284   1606           00236                         BSF             PORTB,4                 ;R/S SET TO '1' to write character
+0285   3047           00237                         MOVLW   B'01000111'             ;'G' in ASCII mode
+0286   0088           00238                         MOVWF   PORTD                   ;Display 'G'
+                      00239                         CLOCK_E
+0287   1686               M                         BSF             PORTB,5
+0288   22CF               M                         CALL    DELAY1
+0289   1286               M                         BCF             PORTB,5
+028A   22CF               M                         CALL    DELAY1
+028B   304F           00240                         MOVLW   B'01001111'             ;'O' in ASCII mode
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+028C   0088           00241                         MOVWF   PORTD                   ;Display 'O'
+                      00242                         CLOCK_E
+028D   1686               M                         BSF             PORTB,5
+028E   22CF               M                         CALL    DELAY1
+028F   1286               M                         BCF             PORTB,5
+0290   22CF               M                         CALL    DELAY1
+0291   304F           00243                         MOVLW   B'01001111'             ;'0' in ASCII mode
+0292   0088           00244                         MOVWF   PORTD                   ;Display 'O'
+                      00245                         CLOCK_E
+0293   1686               M                         BSF             PORTB,5
+0294   22CF               M                         CALL    DELAY1
+0295   1286               M                         BCF             PORTB,5
+0296   22CF               M                         CALL    DELAY1
+0297   3044           00246                         MOVLW   B'01000100'             ;'D' in ASCII mode
+0298   0088           00247                         MOVWF   PORTD                   ;Display 'D'
+                      00248                         CLOCK_E
+0299   1686               M                         BSF             PORTB,5
+029A   22CF               M                         CALL    DELAY1
+029B   1286               M                         BCF             PORTB,5
+029C   22CF               M                         CALL    DELAY1
+029D   30A0           00249                         MOVLW   B'10100000'             
+029E   0088           00250                         MOVWF   PORTD                   ;SPACE
+                      00251                         CLOCK_E
+029F   1686               M                         BSF             PORTB,5
+02A0   22CF               M                         CALL    DELAY1
+02A1   1286               M                         BCF             PORTB,5
+02A2   22CF               M                         CALL    DELAY1
+02A3   304C           00252                         MOVLW   B'01001100'             ;'L' in ASCII mode
+02A4   0088           00253                         MOVWF   PORTD                   ;Display 'L'
+                      00254                         CLOCK_E
+02A5   1686               M                         BSF             PORTB,5
+02A6   22CF               M                         CALL    DELAY1
+02A7   1286               M                         BCF             PORTB,5
+02A8   22CF               M                         CALL    DELAY1
+02A9   3055           00255                         MOVLW   B'01010101'             ;'U' in ASCII mode
+02AA   0088           00256                         MOVWF   PORTD                   ;Display 'U'
+                      00257                         CLOCK_E
+02AB   1686               M                         BSF             PORTB,5
+02AC   22CF               M                         CALL    DELAY1
+02AD   1286               M                         BCF             PORTB,5
+02AE   22CF               M                         CALL    DELAY1
+02AF   3043           00258                         MOVLW   B'01000011'             ;'C' in ASCII mode
+02B0   0088           00259                         MOVWF   PORTD                   ;Display 'C'
+                      00260                         CLOCK_E
+02B1   1686               M                         BSF             PORTB,5
+02B2   22CF               M                         CALL    DELAY1
+02B3   1286               M                         BCF             PORTB,5
+02B4   22CF               M                         CALL    DELAY1
+02B5   304B           00261                         MOVLW   B'01001011'             ;'K' in ASCII mode
+02B6   0088           00262                         MOVWF   PORTD                   ;Display 'K'
+                      00263                         CLOCK_E
+02B7   1686               M                         BSF             PORTB,5
+02B8   22CF               M                         CALL    DELAY1
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+02B9   1286               M                         BCF             PORTB,5
+02BA   22CF               M                         CALL    DELAY1
+02BB   30A0           00264                         MOVLW   B'10100000'             
+02BC   0088           00265                         MOVWF   PORTD                   ;SPACE
+                      00266                         CLOCK_E
+02BD   1686               M                         BSF             PORTB,5
+02BE   22CF               M                         CALL    DELAY1
+02BF   1286               M                         BCF             PORTB,5
+02C0   22CF               M                         CALL    DELAY1
+02C1   303A           00267                         MOVLW   B'00111010'             ;':' in ASCII mode
+02C2   0088           00268                         MOVWF   PORTD                   ;Display ':'
+                      00269                         CLOCK_E
+02C3   1686               M                         BSF             PORTB,5
+02C4   22CF               M                         CALL    DELAY1
+02C5   1286               M                         BCF             PORTB,5
+02C6   22CF               M                         CALL    DELAY1
+02C7   3029           00270                         MOVLW   B'00101001'             ;')' in ASCII mode
+02C8   0088           00271                         MOVWF   PORTD                   ;Display ')'
+                      00272                         CLOCK_E
+02C9   1686               M                         BSF             PORTB,5
+02CA   22CF               M                         CALL    DELAY1
+02CB   1286               M                         BCF             PORTB,5
+02CC   22CF               M                         CALL    DELAY1
+                      00273                         
+                      00274 
+                      00275 
+02CD   0000           00276                         NOP                                             ;NO OPERATION
+02CE   2ACD           00277                         GOTO    $-1                             ;LOCAL LOOPING
+                      00278 
+                      00279 
+                      00280                         
+                      00281 ;=======================================================================================                
+                      00282 ;DELAY SUBROUTINE 
+                      00283 ;=======================================================================================                
+                                            
+                      00284 
+                      00285 
+02CF   3064           00286 DELAY1          MOVLW   D'100'          
+02D0   00A2           00287                         MOVWF   D3
+02D1   300A           00288                         MOVLW   D'10'
+02D2   00A1           00289                         MOVWF   D2
+02D3   3001           00290                         MOVLW   D'1'
+02D4   00A0           00291                         MOVWF   D1
+02D5   0BA0           00292                         DECFSZ  D1
+02D6   2AD5           00293                         GOTO    $-1
+02D7   0BA1           00294                         DECFSZ  D2
+02D8   2AD3           00295                         GOTO    $-5
+02D9   0BA2           00296                         DECFSZ  D3
+02DA   2AD1           00297                         GOTO    $-9
+02DB   0008           00298                         RETURN
+                      00299 
+02DC   30FF           00300 DELAY2          MOVLW   D'255'          
+02DD   00A5           00301                         MOVWF   D6
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+02DE   30C8           00302                         MOVLW   D'200'
+02DF   00A4           00303                         MOVWF   D5
+02E0   3032           00304                         MOVLW   D'50'
+02E1   00A3           00305                         MOVWF   D4
+02E2   0BA3           00306                         DECFSZ  D4
+02E3   2AE2           00307                         GOTO    $-1
+02E4   0BA4           00308                         DECFSZ  D5
+02E5   2AE0           00309                         GOTO    $-5
+02E6   0BA5           00310                         DECFSZ  D6
+02E7   2ADE           00311                         GOTO    $-9
+02E8   0008           00312                         RETURN
+                      00313 
+                      00314 
+                      00315                         END
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+BANK0                             
+BANK1                             
+BANK2                             
+BANK3                             
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2                             0000001B
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHS1                              00000004
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CLOCK_E                           
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+D1                                00000020
+D2                                00000021
+D3                                00000022
+D4                                00000023
+D5                                00000024
+D6                                00000025
+DATA_ADDRESS                      00000005
+DC                                00000001
+DELAY1                            000002CF
+DELAY2                            000002DC
+D_A                               00000005
+D_NOT_A                           00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+GO_NOT_DONE                       00000002
+I2C_DATA                          00000005
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INIT                              00000205
+INT                               00000204
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OBF                               00000006
+OERR                              00000001
+OPTION_REG                        00000081
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+R                                 00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RD0                               00000000
+RD1                               00000001
+RD2                               00000002
+RD3                               00000003
+RD4                               00000004
+RD5                               00000005
+RD6                               00000006
+RD7                               00000007
+RE0                               00000000
+RE1                               00000001
+RE2                               00000002
+READ_WRITE                        00000002
+RESET                             00000200
+RP0                               00000005
+RP1                               00000006
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 15
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RSEN                              00000001
+RX9                               00000006
+RX9D                              00000000
+R_NOT_W                           00000002
+R_W                               00000002
+S                                 00000003
+SEN                               00000000
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 16
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRISD                             00000088
+TRISD0                            00000000
+TRISD1                            00000001
+TRISD2                            00000002
+TRISD3                            00000003
+TRISD4                            00000004
+TRISD5                            00000005
+TRISD6                            00000006
+TRISD7                            00000007
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 17
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_CP_ON                            00001FFF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_DEVID1                           00002006
+_FOSC_EXTRC                       00003FFF
+_FOSC_HS                          00003FFE
+_FOSC_LP                          00003FFC
+_FOSC_XT                          00003FFD
+_HS_OSC                           00003FFE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+__DEBUG                           1
+MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 18
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+
+0200 : X---XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0240 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0280 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+02C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXX------- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   230
+Program Memory Words Free:  7962
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,    12 suppressed
+
+
