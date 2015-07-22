@@ -1,4 +1,4 @@
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  1
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -57,7 +57,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00034 ;ID                     Set cursor move direction               Decrement                               
                             increment
                       00035 ;S                              Specifies to shift display              No display shift                
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  2
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -114,18 +114,19 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00001         LIST
                       00002 
                       00003 ;==========================================================================
-                      00004 ;  MPASM PIC16F877A processor include
-                      00005 ; 
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  3
+                      00004 ; Build date : Nov 13 2014
+                      00005 ;  MPASM PIC16F877A processor include
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
-                      00007 ;==========================================================================
-                      00008 
-                      00566         LIST
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2014 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00567         LIST
                       00065 
 2007   3F32           00066                         __CONFIG        0X3F32
                       00067 
@@ -174,13 +175,13 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
   00000022            00109 D3                      EQU             0X22    ;FOR DELAY
   00000023            00110 D4                      EQU             0X23    ;FOR DELAY
   00000024            00111 D5                      EQU             0X24    ;FOR DELAY
-  00000025            00112 D6                      EQU             0X25    ;FOR DELAY
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  4
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE  4
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
+  00000025            00112 D6                      EQU             0X25    ;FOR DELAY
                       00113 
                       00114 
                       00115 
@@ -188,9 +189,9 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00117 ;=========================================================================================
                       00118 ; RESET VECTOR
                       00119 ;=========================================================================================
-0200                  00120                         ORG             0X200
+                      00120                         ORG             0X200
                       00121 
-0200   2A05           00122 RESET           GOTO    INIT
+0200   2???           00122 RESET           GOTO    INIT
                       00123 
                       00124 
                       00125 ;=========================================================================================
@@ -198,16 +199,16 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00127 ;=========================================================================================
                       00128         
                       00129 
-0204                  00130                         ORG             0X204
+                      00130                         ORG             0X204
                       00131         
-0204   2A05           00132 INT                     GOTO    INIT
+0204   2???           00132 INT                     GOTO    INIT
                       00133 
                       00134 ;=========================================================================================
                       00135 ; INITIALIAZATION OF I/O
                       00136 ;=========================================================================================
                       00137 
                       00138 
-0205                  00139                         ORG             0X205
+                      00139                         ORG             0X205
                       00140 
                       00141 INIT            BANK0
 0205   1283               M                         BCF             STATUS,RP0                                      
@@ -233,13 +234,13 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00158                                 
                       00159                         BANK0
 0215   1283               M                         BCF             STATUS,RP0                                      
-0216   1303               M                         BCF             STATUS,RP1
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  5
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE  5
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
+0216   1303               M                         BCF             STATUS,RP1
 0217   0188           00160                         CLRF    PORTD
                       00161 
                       00162 
@@ -249,8 +250,8 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00166 
                       00167 ;LCD INITIALIZED
                       00168                         
-0218   22CF           00169                         CALL    DELAY1
-0219   22CF           00170                         CALL    DELAY1
+0218   2???           00169                         CALL    DELAY1
+0219   2???           00170                         CALL    DELAY1
                       00171 
 021A   1206           00172                         BCF             PORTB,4                         ; R/S SET TO '0'as a command    
                                     
@@ -258,47 +259,47 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 021C   0088           00174                         MOVWF   PORTD                           ; FUNCTION SET: 8 BIT INTERFACE
                       00175                         CLOCK_E                                         ; E CLOCK MACRO
 021D   1686               M                         BSF             PORTB,5
-021E   22CF               M                         CALL    DELAY1
+021E   2???               M                         CALL    DELAY1
 021F   1286               M                         BCF             PORTB,5
-0220   22CF               M                         CALL    DELAY1
+0220   2???               M                         CALL    DELAY1
 0221   300D           00176                         MOVLW   B'00001101'                     
 0222   0088           00177                         MOVWF   PORTD                           ; DISPALY & CURSOR: SET TO DISPLAY ON; C
                             URSOR UNDERLINE OFF; CURSOR BLINK ON
                       00178                         CLOCK_E                                         ; E CLOCK MACRO
 0223   1686               M                         BSF             PORTB,5
-0224   22CF               M                         CALL    DELAY1
+0224   2???               M                         CALL    DELAY1
 0225   1286               M                         BCF             PORTB,5
-0226   22CF               M                         CALL    DELAY1
+0226   2???               M                         CALL    DELAY1
 0227   3038           00179                         MOVLW   B'00111000'             
 0228   0088           00180                         MOVWF   PORTD                           ; FUNCTION SET: 8 BIT; 2 LINE MODE; 5X7 
                             DOT FORMAT
                       00181                         CLOCK_E                                         ; E CLOCK MACRO
 0229   1686               M                         BSF             PORTB,5
-022A   22CF               M                         CALL    DELAY1
+022A   2???               M                         CALL    DELAY1
 022B   1286               M                         BCF             PORTB,5
-022C   22CF               M                         CALL    DELAY1
+022C   2???               M                         CALL    DELAY1
 022D   3001           00182                         MOVLW   B'00000001'                     
 022E   0088           00183                         MOVWF   PORTD                           ; CLEAR DISPLAY
                       00184                         CLOCK_E                                         ; E CLOCK MACRO                 
                                                                             
 022F   1686               M                         BSF             PORTB,5
-0230   22CF               M                         CALL    DELAY1
+0230   2???               M                         CALL    DELAY1
 0231   1286               M                         BCF             PORTB,5
-0232   22CF               M                         CALL    DELAY1
+0232   2???               M                         CALL    DELAY1
 0233   3006           00185                         MOVLW   B'00000110'
 0234   0088           00186                         MOVWF   PORTD                           ; CHARACTER ENTRY MODE: INCREMENT; DISPL
                             AY SHIFT ON
                       00187                         CLOCK_E                                         ; E CLOCK MACRO
 0235   1686               M                         BSF             PORTB,5
-0236   22CF               M                         CALL    DELAY1
+0236   2???               M                         CALL    DELAY1
 0237   1286               M                         BCF             PORTB,5
-0238   22CF               M                         CALL    DELAY1
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  6
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE  6
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
+0238   2???               M                         CALL    DELAY1
                       00188 
                       00189 
                       00190 ;WRITE YOUR CHARACTER HERE
@@ -308,87 +309,87 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 023B   0088           00194                         MOVWF   PORTD                   ;Display 'H'
                       00195                         CLOCK_E                                 
 023C   1686               M                         BSF             PORTB,5
-023D   22CF               M                         CALL    DELAY1
+023D   2???               M                         CALL    DELAY1
 023E   1286               M                         BCF             PORTB,5
-023F   22CF               M                         CALL    DELAY1
+023F   2???               M                         CALL    DELAY1
 0240   3065           00196                         MOVLW   B'01100101'             ;'e' in ASCII mode
 0241   0088           00197                         MOVWF   PORTD                   ;Display 'e'
                       00198                         CLOCK_E                                 
 0242   1686               M                         BSF             PORTB,5
-0243   22CF               M                         CALL    DELAY1
+0243   2???               M                         CALL    DELAY1
 0244   1286               M                         BCF             PORTB,5
-0245   22CF               M                         CALL    DELAY1
+0245   2???               M                         CALL    DELAY1
 0246   3072           00199                         MOVLW   B'01110010'             ;'r' in ASCII mode
 0247   0088           00200                         MOVWF   PORTD                   ;Diplay 'r'
                       00201                         CLOCK_E                                 
 0248   1686               M                         BSF             PORTB,5
-0249   22CF               M                         CALL    DELAY1
+0249   2???               M                         CALL    DELAY1
 024A   1286               M                         BCF             PORTB,5
-024B   22CF               M                         CALL    DELAY1
+024B   2???               M                         CALL    DELAY1
 024C   3065           00202                         MOVLW   B'01100101'             ;'e' in ASCII mode
 024D   0088           00203                         MOVWF   PORTD                   ;Display 'e'
                       00204                         CLOCK_E
 024E   1686               M                         BSF             PORTB,5
-024F   22CF               M                         CALL    DELAY1
+024F   2???               M                         CALL    DELAY1
 0250   1286               M                         BCF             PORTB,5
-0251   22CF               M                         CALL    DELAY1
+0251   2???               M                         CALL    DELAY1
 0252   30A0           00205                         MOVLW   B'10100000'             
 0253   0088           00206                         MOVWF   PORTD                   ;SPACE
                       00207                         CLOCK_E 
 0254   1686               M                         BSF             PORTB,5
-0255   22CF               M                         CALL    DELAY1
+0255   2???               M                         CALL    DELAY1
 0256   1286               M                         BCF             PORTB,5
-0257   22CF               M                         CALL    DELAY1
+0257   2???               M                         CALL    DELAY1
 0258   3075           00208                         MOVLW   B'01110101'             ;'u' in ASCII mode
 0259   0088           00209                         MOVWF   PORTD                   ;Display 'u'
                       00210                         CLOCK_E
 025A   1686               M                         BSF             PORTB,5
-025B   22CF               M                         CALL    DELAY1
+025B   2???               M                         CALL    DELAY1
 025C   1286               M                         BCF             PORTB,5
-025D   22CF               M                         CALL    DELAY1
+025D   2???               M                         CALL    DELAY1
 025E   30A0           00211                         MOVLW   B'10100000'             
 025F   0088           00212                         MOVWF   PORTD                   ;SPACE
                       00213                         CLOCK_E
 0260   1686               M                         BSF             PORTB,5
-0261   22CF               M                         CALL    DELAY1
-0262   1286               M                         BCF             PORTB,5
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  7
+0261   2???               M                         CALL    DELAY1
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE  7
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0263   22CF               M                         CALL    DELAY1
+0262   1286               M                         BCF             PORTB,5
+0263   2???               M                         CALL    DELAY1
 0264   3067           00214                         MOVLW   B'01100111'             ;'g' in ASCII mode
 0265   0088           00215                         MOVWF   PORTD                   ;Display 'g'
                       00216                         CLOCK_E
 0266   1686               M                         BSF             PORTB,5
-0267   22CF               M                         CALL    DELAY1
+0267   2???               M                         CALL    DELAY1
 0268   1286               M                         BCF             PORTB,5
-0269   22CF               M                         CALL    DELAY1
+0269   2???               M                         CALL    DELAY1
 026A   306F           00217                         MOVLW   B'01101111'             ;'o' in ASCII mode
 026B   0088           00218                         MOVWF   PORTD                   ;Display 'o'
                       00219                         CLOCK_E
 026C   1686               M                         BSF             PORTB,5
-026D   22CF               M                         CALL    DELAY1
+026D   2???               M                         CALL    DELAY1
 026E   1286               M                         BCF             PORTB,5
-026F   22CF               M                         CALL    DELAY1
+026F   2???               M                         CALL    DELAY1
 0270   302E           00220                         MOVLW   B'00101110'             ;'.' in ASCII mode
 0271   0088           00221                         MOVWF   PORTD                   ;Display '.'
                       00222                         CLOCK_E
 0272   1686               M                         BSF             PORTB,5
-0273   22CF               M                         CALL    DELAY1
+0273   2???               M                         CALL    DELAY1
 0274   1286               M                         BCF             PORTB,5
-0275   22CF               M                         CALL    DELAY1
+0275   2???               M                         CALL    DELAY1
 0276   302E           00223                         MOVLW   B'00101110'             ;'.' in ASCII mode
 0277   0088           00224                         MOVWF   PORTD                   ;Display '.'
                       00225                         CLOCK_E
 0278   1686               M                         BSF             PORTB,5
-0279   22CF               M                         CALL    DELAY1
+0279   2???               M                         CALL    DELAY1
 027A   1286               M                         BCF             PORTB,5
-027B   22CF               M                         CALL    DELAY1
+027B   2???               M                         CALL    DELAY1
                       00226                                 
-027C   22CF           00227                         CALL    DELAY1
+027C   2???           00227                         CALL    DELAY1
                       00228                         
 027D   1206           00229                         BCF             PORTB,4                 ; R/S SET TO '0' as a command
 027E   30C0           00230                         MOVLW   B'11000000'             ; B'10000000' is a command to jump to 2nd line
@@ -398,112 +399,112 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 027F   0088           00233                         MOVWF   PORTD                   ; JUMP TO 2ND LINE
                       00234                         CLOCK_E
 0280   1686               M                         BSF             PORTB,5
-0281   22CF               M                         CALL    DELAY1
+0281   2???               M                         CALL    DELAY1
 0282   1286               M                         BCF             PORTB,5
-0283   22CF               M                         CALL    DELAY1
+0283   2???               M                         CALL    DELAY1
                       00235 
 0284   1606           00236                         BSF             PORTB,4                 ;R/S SET TO '1' to write character
 0285   3047           00237                         MOVLW   B'01000111'             ;'G' in ASCII mode
 0286   0088           00238                         MOVWF   PORTD                   ;Display 'G'
                       00239                         CLOCK_E
 0287   1686               M                         BSF             PORTB,5
-0288   22CF               M                         CALL    DELAY1
+0288   2???               M                         CALL    DELAY1
 0289   1286               M                         BCF             PORTB,5
-028A   22CF               M                         CALL    DELAY1
-028B   304F           00240                         MOVLW   B'01001111'             ;'O' in ASCII mode
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  8
+028A   2???               M                         CALL    DELAY1
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE  8
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
+028B   304F           00240                         MOVLW   B'01001111'             ;'O' in ASCII mode
 028C   0088           00241                         MOVWF   PORTD                   ;Display 'O'
                       00242                         CLOCK_E
 028D   1686               M                         BSF             PORTB,5
-028E   22CF               M                         CALL    DELAY1
+028E   2???               M                         CALL    DELAY1
 028F   1286               M                         BCF             PORTB,5
-0290   22CF               M                         CALL    DELAY1
+0290   2???               M                         CALL    DELAY1
 0291   304F           00243                         MOVLW   B'01001111'             ;'0' in ASCII mode
 0292   0088           00244                         MOVWF   PORTD                   ;Display 'O'
                       00245                         CLOCK_E
 0293   1686               M                         BSF             PORTB,5
-0294   22CF               M                         CALL    DELAY1
+0294   2???               M                         CALL    DELAY1
 0295   1286               M                         BCF             PORTB,5
-0296   22CF               M                         CALL    DELAY1
+0296   2???               M                         CALL    DELAY1
 0297   3044           00246                         MOVLW   B'01000100'             ;'D' in ASCII mode
 0298   0088           00247                         MOVWF   PORTD                   ;Display 'D'
                       00248                         CLOCK_E
 0299   1686               M                         BSF             PORTB,5
-029A   22CF               M                         CALL    DELAY1
+029A   2???               M                         CALL    DELAY1
 029B   1286               M                         BCF             PORTB,5
-029C   22CF               M                         CALL    DELAY1
+029C   2???               M                         CALL    DELAY1
 029D   30A0           00249                         MOVLW   B'10100000'             
 029E   0088           00250                         MOVWF   PORTD                   ;SPACE
                       00251                         CLOCK_E
 029F   1686               M                         BSF             PORTB,5
-02A0   22CF               M                         CALL    DELAY1
+02A0   2???               M                         CALL    DELAY1
 02A1   1286               M                         BCF             PORTB,5
-02A2   22CF               M                         CALL    DELAY1
+02A2   2???               M                         CALL    DELAY1
 02A3   304C           00252                         MOVLW   B'01001100'             ;'L' in ASCII mode
 02A4   0088           00253                         MOVWF   PORTD                   ;Display 'L'
                       00254                         CLOCK_E
 02A5   1686               M                         BSF             PORTB,5
-02A6   22CF               M                         CALL    DELAY1
+02A6   2???               M                         CALL    DELAY1
 02A7   1286               M                         BCF             PORTB,5
-02A8   22CF               M                         CALL    DELAY1
+02A8   2???               M                         CALL    DELAY1
 02A9   3055           00255                         MOVLW   B'01010101'             ;'U' in ASCII mode
 02AA   0088           00256                         MOVWF   PORTD                   ;Display 'U'
                       00257                         CLOCK_E
 02AB   1686               M                         BSF             PORTB,5
-02AC   22CF               M                         CALL    DELAY1
+02AC   2???               M                         CALL    DELAY1
 02AD   1286               M                         BCF             PORTB,5
-02AE   22CF               M                         CALL    DELAY1
+02AE   2???               M                         CALL    DELAY1
 02AF   3043           00258                         MOVLW   B'01000011'             ;'C' in ASCII mode
 02B0   0088           00259                         MOVWF   PORTD                   ;Display 'C'
                       00260                         CLOCK_E
 02B1   1686               M                         BSF             PORTB,5
-02B2   22CF               M                         CALL    DELAY1
+02B2   2???               M                         CALL    DELAY1
 02B3   1286               M                         BCF             PORTB,5
-02B4   22CF               M                         CALL    DELAY1
+02B4   2???               M                         CALL    DELAY1
 02B5   304B           00261                         MOVLW   B'01001011'             ;'K' in ASCII mode
 02B6   0088           00262                         MOVWF   PORTD                   ;Display 'K'
                       00263                         CLOCK_E
 02B7   1686               M                         BSF             PORTB,5
-02B8   22CF               M                         CALL    DELAY1
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE  9
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE  9
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
+02B8   2???               M                         CALL    DELAY1
 02B9   1286               M                         BCF             PORTB,5
-02BA   22CF               M                         CALL    DELAY1
+02BA   2???               M                         CALL    DELAY1
 02BB   30A0           00264                         MOVLW   B'10100000'             
 02BC   0088           00265                         MOVWF   PORTD                   ;SPACE
                       00266                         CLOCK_E
 02BD   1686               M                         BSF             PORTB,5
-02BE   22CF               M                         CALL    DELAY1
+02BE   2???               M                         CALL    DELAY1
 02BF   1286               M                         BCF             PORTB,5
-02C0   22CF               M                         CALL    DELAY1
+02C0   2???               M                         CALL    DELAY1
 02C1   303A           00267                         MOVLW   B'00111010'             ;':' in ASCII mode
 02C2   0088           00268                         MOVWF   PORTD                   ;Display ':'
                       00269                         CLOCK_E
 02C3   1686               M                         BSF             PORTB,5
-02C4   22CF               M                         CALL    DELAY1
+02C4   2???               M                         CALL    DELAY1
 02C5   1286               M                         BCF             PORTB,5
-02C6   22CF               M                         CALL    DELAY1
+02C6   2???               M                         CALL    DELAY1
 02C7   3029           00270                         MOVLW   B'00101001'             ;')' in ASCII mode
 02C8   0088           00271                         MOVWF   PORTD                   ;Display ')'
                       00272                         CLOCK_E
 02C9   1686               M                         BSF             PORTB,5
-02CA   22CF               M                         CALL    DELAY1
+02CA   2???               M                         CALL    DELAY1
 02CB   1286               M                         BCF             PORTB,5
-02CC   22CF               M                         CALL    DELAY1
+02CC   2???               M                         CALL    DELAY1
                       00273                         
                       00274 
                       00275 
 02CD   0000           00276                         NOP                                             ;NO OPERATION
-02CE   2ACD           00277                         GOTO    $-1                             ;LOCAL LOOPING
+02CE   2???           00277                         GOTO    $-1                             ;LOCAL LOOPING
                       00278 
                       00279 
                       00280                         
@@ -520,36 +521,36 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 02D3   3001           00290                         MOVLW   D'1'
 02D4   00A0           00291                         MOVWF   D1
 02D5   0BA0           00292                         DECFSZ  D1
-02D6   2AD5           00293                         GOTO    $-1
+02D6   2???           00293                         GOTO    $-1
 02D7   0BA1           00294                         DECFSZ  D2
-02D8   2AD3           00295                         GOTO    $-5
+02D8   2???           00295                         GOTO    $-5
 02D9   0BA2           00296                         DECFSZ  D3
-02DA   2AD1           00297                         GOTO    $-9
+02DA   2???           00297                         GOTO    $-9
 02DB   0008           00298                         RETURN
                       00299 
 02DC   30FF           00300 DELAY2          MOVLW   D'255'          
-02DD   00A5           00301                         MOVWF   D6
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 10
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE 10
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
+02DD   00A5           00301                         MOVWF   D6
 02DE   30C8           00302                         MOVLW   D'200'
 02DF   00A4           00303                         MOVWF   D5
 02E0   3032           00304                         MOVLW   D'50'
 02E1   00A3           00305                         MOVWF   D4
 02E2   0BA3           00306                         DECFSZ  D4
-02E3   2AE2           00307                         GOTO    $-1
+02E3   2???           00307                         GOTO    $-1
 02E4   0BA4           00308                         DECFSZ  D5
-02E5   2AE0           00309                         GOTO    $-5
+02E5   2???           00309                         GOTO    $-5
 02E6   0BA5           00310                         DECFSZ  D6
-02E7   2ADE           00311                         GOTO    $-9
+02E7   2???           00311                         GOTO    $-9
 02E8   0008           00312                         RETURN
                       00313 
                       00314 
-                      00315                         END
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 11
+3F32                  00315                         END
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE 11
 
 
 SYMBOL TABLE
@@ -608,7 +609,7 @@ CCPR2                             0000001B
 CCPR2H                            0000001C
 CCPR2L                            0000001B
 CHS0                              00000003
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 12
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE 12
 
 
 SYMBOL TABLE
@@ -667,7 +668,7 @@ GO                                00000002
 GO_DONE                           00000002
 GO_NOT_DONE                       00000002
 I2C_DATA                          00000005
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 13
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE 13
 
 
 SYMBOL TABLE
@@ -726,7 +727,7 @@ PR2                               00000092
 PS0                               00000000
 PS1                               00000001
 PS2                               00000002
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 14
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE 14
 
 
 SYMBOL TABLE
@@ -785,7 +786,7 @@ READ_WRITE                        00000002
 RESET                             00000200
 RP0                               00000005
 RP1                               00000006
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 15
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE 15
 
 
 SYMBOL TABLE
@@ -844,7 +845,7 @@ TMR2                              00000011
 TMR2IE                            00000001
 TMR2IF                            00000001
 TMR2ON                            00000002
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 16
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE 16
 
 
 SYMBOL TABLE
@@ -903,7 +904,7 @@ TXIF                              00000004
 TXREG                             00000019
 TXSTA                             00000098
 UA                                00000001
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 17
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE 17
 
 
 SYMBOL TABLE
@@ -915,6 +916,13 @@ WR                                00000001
 WREN                              00000002
 WRERR                             00000003
 Z                                 00000002
+_.org_2_02CE                      000002CE
+_.org_2_02D6                      000002D6
+_.org_2_02D8                      000002D8
+_.org_2_02DA                      000002DA
+_.org_2_02E3                      000002E3
+_.org_2_02E5                      000002E5
+_.org_2_02E7                      000002E7
 _BODEN_OFF                        00003FBF
 _BODEN_ON                         00003FFF
 _BOREN_OFF                        00003FBF
@@ -953,23 +961,11 @@ _WRT_HALF                         000039FF
 _WRT_OFF                          00003FFF
 _XT_OSC                           00003FFD
 __16F877A                         00000001
-__DEBUG                           1
-MPASM  5.51               SAMPLE CODE PR3.ASM   7-22-2015  9:21:20         PAGE 18
+
+MPASM 5.60               SAMPLE CODE PR3.ASM   7-22-2015  9:38:18         PAGE 18
 
 
-MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
 
-
-0200 : X---XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
-0240 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
-0280 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
-02C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXX------- ----------------
-2000 : -------X-------- ---------------- ---------------- ----------------
-
-All other memory blocks unused.
-
-Program Memory Words Used:   230
-Program Memory Words Free:  7962
 
 
 Errors   :     0

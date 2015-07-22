@@ -1,0 +1,59 @@
+MPLINK 5.06, LINKER
+Linker Map File - Created Wed Jul 22 09:38:20 2015
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000200    program   0x000002
+                   .cinit    romdata   0x000201    program   0x000004
+                   .org_1       code   0x000204    program   0x000002
+                   .org_2       code   0x000205    program   0x0001c8
+.config_2007_BUILD/DEFAULT/PRODUCTION/_EXT/13       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000200    0x000202      
+                            0x000204    0x0002e8      
+                            0x002007    0x002007      
+            233 out of 8454 program addresses used, program memory utilization is 2%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                   DELAY1   0x0002cf    program     static ..\..\Source Code PR3\sample code PR3.asm
+                   DELAY2   0x0002dc    program     static ..\..\Source Code PR3\sample code PR3.asm
+                     INIT   0x000205    program     static ..\..\Source Code PR3\sample code PR3.asm
+                      INT   0x000204    program     static ..\..\Source Code PR3\sample code PR3.asm
+                    RESET   0x000200    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02CE   0x0002ce    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02D6   0x0002d6    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02D8   0x0002d8    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02DA   0x0002da    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02E3   0x0002e3    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02E5   0x0002e5    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02E7   0x0002e7    program     static ..\..\Source Code PR3\sample code PR3.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    RESET   0x000200    program     static ..\..\Source Code PR3\sample code PR3.asm
+                      INT   0x000204    program     static ..\..\Source Code PR3\sample code PR3.asm
+                     INIT   0x000205    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02CE   0x0002ce    program     static ..\..\Source Code PR3\sample code PR3.asm
+                   DELAY1   0x0002cf    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02D6   0x0002d6    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02D8   0x0002d8    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02DA   0x0002da    program     static ..\..\Source Code PR3\sample code PR3.asm
+                   DELAY2   0x0002dc    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02E3   0x0002e3    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02E5   0x0002e5    program     static ..\..\Source Code PR3\sample code PR3.asm
+             _.org_2_02E7   0x0002e7    program     static ..\..\Source Code PR3\sample code PR3.asm
+
+
